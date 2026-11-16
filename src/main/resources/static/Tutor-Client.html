@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Music lesson Booking Service</title>
+</head>
+<body>
+	<H1>
+	Tutor client for kofi's music lab
+	</H1>
+	<H2>
+	Tutor Identity
+	</H2>
+	<H3>
+	Tutor Name: 
+	<h3>
+    Teaches:
+	</h3>
+	<hr/>
+	</H3>
+  <div>
+  <H1>
+  View booked lessons
+  </H1>
+  <h2>
+	<h5>
+	<select> 
+		<option value="Mon">Mon</option>
+		<option value="Tues">Tues</option>
+		<option value="Wed">Wed</option>
+		<option value="Thurs">Thurs</option>
+		<option value="Fri">Fri</option>
+		<option value="Mon">Sat</option>
+	</select> 
+
+	<button type="button" onclick="read_all_request();">list lessons</button>
+	</h5>
+	<h2>
+	</hr>
+  </div>
+
+  
+  <div id="output"></div>
+
+  <script>
+    function ding_request() {
+  const output = document.getElementById('output');
+  const name_val = document.getElementById('name').value;
+  const lang_val = document.getElementById('student-id').value;
+
+  let url = 'http://localhost:8080/ding/' +
+            encodeURIComponent(lang_val);
+
+  if (name_val !== '') {
+    url += '?name=' + encodeURIComponent(name_val);
+  }
+
+  fetch(url)
+    .then(response => {
+      const status = response.status;
+      return response.json().then(data => ({
+        status: status,
+        data: data
+      }));
+    })
+    .then(result => {
+      output.textContent =
+        'Status: ' + result.status + '\n' +
+        'Response: ' + JSON.stringify(result.data);
+    })
+    .catch(error => {
+      output.textContent = error.message;
+    });
+}
+
+function read_all_request() {
+  const output = document.getElementById('output');
+
+  fetch('http://localhost:8080/viewAllBookings')
+    .then(response => {
+      const status = response.status;
+      return response.json().then(data => ({
+        status: status,
+        data: data
+      }));
+    })
+    .then(result => {
+      output.textContent =
+        'Status: ' + result.status + '\n' +
+        'Response: ' + JSON.stringify(result.data);
+    })
+    .catch(error => {
+      output.textContent = error.message;
+    });
+}
+
+function create_request() {
+  const output = document.getElementById('output');
+  const lang_val = document.getElementById('lang').value;
+  const msg_val = document.getElementById('msg').value;
+
+  fetch('http://localhost:8080/ding', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      lang: lang_val,
+      msg: msg_val
+    })
+  })
+    .then(response => {
+      output.textContent =
+        'Status: ' + response.status;
+
+      return response.text();
+    })
+    .then(body => {
+      if (body) {
+        output.textContent += '\nResponse: ' + body;
+      }
+    })
+    .catch(error => {
+      output.textContent = error.message;
+    });
+}
+
+function update_request() {
+  const output = document.getElementById('output');
+  const lang_val = document.getElementById('lang').value;
+  const msg_val = document.getElementById('msg').value;
+
+  fetch('http://localhost:8080/ding/' +
+        encodeURIComponent(lang_val), {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      lang: lang_val,
+      msg: msg_val
+    })
+  })
+    .then(response => {
+      output.textContent =
+        'Status: ' + response.status;
+
+      return response.text();
+    })
+    .then(body => {
+      if (body) {
+        output.textContent += '\nResponse: ' + body;
+      }
+    })
+    .catch(error => {
+      output.textContent = error.message;
+    });
+}
+
+function delete_request() {
+  const output = document.getElementById('output');
+  const lang_val = document.getElementById('lang').value;
+
+  fetch('http://localhost:8080/ding/' +
+        encodeURIComponent(lang_val), {
+    method: 'DELETE'
+  })
+    .then(response => {
+      output.textContent =
+        'Status: ' + response.status;
+
+      return response.text();
+    })
+    .then(body => {
+      if (body) {
+        output.textContent += '\nResponse: ' + body;
+      }
+    })
+    .catch(error => {
+      output.textContent = error.message;
+    });
+}
+  </script>
+</body>
+</html>
