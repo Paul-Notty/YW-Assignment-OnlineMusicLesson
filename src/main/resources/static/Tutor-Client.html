@@ -13,7 +13,9 @@
 	Tutor Identity
 	</H2>
 	<H3>
-	Tutor Name: 
+	<select id="tutor">
+	<option value="">Select Tutor</option>
+	</select>
 	<h3>
     Teaches:
 	</h3>
@@ -25,16 +27,35 @@
   </H1>
   <h2>
 	<h5>
-	<select> 
+	<select id="day"> 
 		<option value="Mon">Mon</option>
 		<option value="Tues">Tues</option>
 		<option value="Wed">Wed</option>
 		<option value="Thurs">Thurs</option>
 		<option value="Fri">Fri</option>
-		<option value="Mon">Sat</option>
-	</select> 
-
-	<button type="button" onclick="read_all_request();">list lessons</button>
+		<option value="Sat">Sat</option>
+	</select> at 
+	<select id="slot"></select>
+    <script>
+        const time = ["09:00" , "09:30" , "10:00" , "10:30", "11:00" , "11:30" , "12:00" , "12:30" , "13:00" ,  "13:30"  , "14:00" , "14:30", "15:00" , "15:30"  , "16:00" , "16:30" , "17:00" ,"17:30" ,  "18:00"  ,  "18:30" ,"19:00" , "19:30" , "20:00"];
+        const daySelect = document.getElementById("day");
+		const timeSelect = document.getElementById("slot");
+		function updateTimes(){
+		let allTimes = time;
+		
+		if(daySelect.value === "Sat"){
+		allTimes = time;
+		}
+		else{
+		allTimes = time.filter(t=> t >= "16:00")
+		
+		}
+		timeSelect.innerHTML = allTimes.map(t => `<option value="${t}">${t}</option>`).join("");
+		}
+		daySelect.addEventListener("change" , updateTimes);
+		updateTimes();
+    </script> 
+	<button type="button" onclick="list_upcoming_lessons();">list lessons</button>
 	</h5>
 	<h2>
 	</hr>
@@ -44,35 +65,7 @@
   <div id="output"></div>
 
   <script>
-    function ding_request() {
-  const output = document.getElementById('output');
-  const name_val = document.getElementById('name').value;
-  const lang_val = document.getElementById('student-id').value;
-
-  let url = 'http://localhost:8080/ding/' +
-            encodeURIComponent(lang_val);
-
-  if (name_val !== '') {
-    url += '?name=' + encodeURIComponent(name_val);
-  }
-
-  fetch(url)
-    .then(response => {
-      const status = response.status;
-      return response.json().then(data => ({
-        status: status,
-        data: data
-      }));
-    })
-    .then(result => {
-      output.textContent =
-        'Status: ' + result.status + '\n' +
-        'Response: ' + JSON.stringify(result.data);
-    })
-    .catch(error => {
-      output.textContent = error.message;
-    });
-}
+   
 
 function read_all_request() {
   const output = document.getElementById('output');
@@ -126,61 +119,114 @@ function create_request() {
     });
 }
 
-function update_request() {
-  const output = document.getElementById('output');
-  const lang_val = document.getElementById('lang').value;
-  const msg_val = document.getElementById('msg').value;
+function loadTutors() {
 
-  fetch('http://localhost:8080/ding/' +
-        encodeURIComponent(lang_val), {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      lang: lang_val,
-      msg: msg_val
-    })
-  })
-    .then(response => {
-      output.textContent =
-        'Status: ' + response.status;
+    const tutorSelect = document.getElementById("tutor");
+    const teaches = document.getElementById("teaches");
+	
 
-      return response.text();
-    })
-    .then(body => {
-      if (body) {
-        output.textContent += '\nResponse: ' + body;
-      }
-    })
-    .catch(error => {
-      output.textContent = error.message;
-    });
+    fetch('http://localhost:8080/getTutors')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Could not load tutors");
+            }
+            return response.json();
+        })
+        .then(tutors => {
+
+            tutorSelect.innerHTML = '<option value="">Select a tutor</option>';
+
+            tutors.forEach(tutor => {
+
+                const option = document.createElement("option");
+
+                option.value = tutor.name;
+                option.textContent = tutor.name;
+                option.dataset.instrument = tutor.instrument.map(i => `${i.instrumentName} (Grade: ${i.minGrade} - ${i.maxGrade})`).join(" , ");
+
+                tutorSelect.appendChild(option);
+
+            });
+
+        })
+        .catch(error => {
+            console.error(error);
+        });
 }
 
-function delete_request() {
-  const output = document.getElementById('output');
-  const lang_val = document.getElementById('lang').value;
 
-  fetch('http://localhost:8080/ding/' +
-        encodeURIComponent(lang_val), {
-    method: 'DELETE'
-  })
-    .then(response => {
-      output.textContent =
-        'Status: ' + response.status;
+function list_upcoming_lessons(){
+    const output = document.getElementById('output');
+    const tutorName_val = document.getElementById('tutor').value;
 
-      return response.text();
-    })
-    .then(body => {
-      if (body) {
-        output.textContent += '\nResponse: ' + body;
-      }
-    })
-    .catch(error => {
-      output.textContent = error.message;
-    });
+    fetch('http://localhost:8080/viewBookings?name=' + encodeURIComponent(tutorName_val))
+        .then(response => {
+            const status = response.status;
+            return response.json().then(data => ({
+                status: status,
+                data: data
+            }));
+        })
+        .then(result => {
+            let display = 'Status: ' + result.status + '\n';
+
+            result.data.forEach(booking => {
+                display += '\nBooking ID: ' + booking.bookingId;
+                display += '\nName: ' + booking.pup.name;
+                display += '\nStudent ID: ' + booking.pup.studentid;
+                display += '\nInstrument: ' + booking.instruments.instrumentName;
+                display += '\nTutor: ' + booking.tutors.name;
+                display += '\nDay: ' + booking.day;
+                display += '\nTime: ' + booking.slot;
+            });
+
+            output.textContent = display;
+        })
+        .catch(error => {
+            output.textContent = error.message;
+        });
 }
+
+
+document.getElementById("tutor").addEventListener("change", function() {
+
+    const selectedTutor = this.options[this.selectedIndex];
+
+    const instruments = selectedTutor.dataset.instrument || "";
+
+    // Display all instruments taught
+    document.getElementById("teaches").textContent = instruments;
+
+    // Get the instrument dropdown
+    const instrumentSelect = document.getElementById("instrument");
+
+    // Clear existing options
+    instrumentSelect.innerHTML = "";
+
+    if (instruments === "") {
+        instrumentSelect.innerHTML =
+            '<option value="">Select a tutor first</option>';
+        return;
+    }
+
+    // Add each instrument as an individual option
+    const instrumentNames = instruments.split(", ");
+
+    instrumentNames.forEach(name => {
+	
+		const cleanName = name.split(" (")[0];
+        const option = document.createElement("option");
+        option.value = cleanName;
+        option.textContent = cleanName;
+        instrumentSelect.appendChild(option);
+    });
+
+});
+	
+
+	window.addEventListener("DOMContentLoaded", loadTutors);
+
+
   </script>
 </body>
 </html>

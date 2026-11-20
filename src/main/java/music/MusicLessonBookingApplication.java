@@ -28,14 +28,14 @@ public class MusicLessonBookingApplication {
         	List<Instrument> Kofi = new ArrayList<>();
         	List<Instrument> Franky = new ArrayList<>();
         	List<Instrument> Keith = new ArrayList<>();
-        	List<Instrument> Poo = new ArrayList<>();
+ 
         	
         	Kofi.add(new Instrument("piano" , 3 ,8));
-        	Kofi.add(new Instrument("guitar" , 1 ,3));
+        	Kofi.add(new Instrument("guitar" , 1 ,8));
         	Kofi.add(new Instrument("oboe" , 6 ,9));
         	
        
-        	Franky.add(new Instrument("drums" , 4,9));
+        	Franky.add(new Instrument("drums" , 1,9));
         	Franky.add(new Instrument("Harmonica",4,8));
         	Franky.add(new Instrument("trumpet" , 3,9));
         	
@@ -48,7 +48,7 @@ public class MusicLessonBookingApplication {
         	Tutor keith = new Tutor("Keith Vernon" , Keith);
         	
         	
-        	
+        	  
         	ws.addTutor(kofi);
         	ws.addTutor(franky);
         	ws.addTutor(keith);

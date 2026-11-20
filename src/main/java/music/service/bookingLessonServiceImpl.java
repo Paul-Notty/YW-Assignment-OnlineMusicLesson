@@ -16,6 +16,7 @@ public class bookingLessonServiceImpl implements bookingLessonService {
 
     private Map<Integer, BookingLessonModel> db;
     private Map<String ,Tutor> tutors;
+    private Map<String , List<String>> blockedSlots;
     private int noOfBookings = 1; 
     private int bookingId = 0;
     
@@ -25,19 +26,18 @@ public class bookingLessonServiceImpl implements bookingLessonService {
     public bookingLessonServiceImpl() {
         db = new HashMap<>();
         tutors = new HashMap<>();
+        blockedSlots = new HashMap<>();
+  
     }
 
   
     public void bookLesson(BookingLessonModel lesson) {
-    
-        if (lesson !=null) {
-            bookingId = noOfBookings++ ;
-            lesson.setBookingId(bookingId);
-            db.put(lesson.getPup().getStudentid(), lesson);
-   
+        if (lesson != null) {
+            lesson.setBookingId(noOfBookings);
+            db.put(noOfBookings, lesson);
+            noOfBookings++;
         }
     }
-    
     
     public List<String> availableTimeSlots(LocalTime time){
     	
@@ -86,7 +86,7 @@ public class bookingLessonServiceImpl implements bookingLessonService {
     }
 
     public void cancelLesson(BookingLessonModel lesson) {	
-    			db.remove(lesson.getPup().getStudentid());	
+    			db.remove(lesson.getBookingId());	
 
     }
 
@@ -133,6 +133,44 @@ public class bookingLessonServiceImpl implements bookingLessonService {
 
         return lessons;
     }
+
+    
+    public void blockLesson(String tutorName, LocalTime time, String day) {
+
+        String key = tutorName + "-" + day;
+
+        List<String> slots = blockedSlots.getOrDefault(key, new ArrayList<>());
+
+        String slot = time == null ? "ALL" : time.toString();
+
+        if (slot.equals("ALL")) {
+            slots.clear();
+        }
+
+        if (!slots.contains("ALL") && !slots.contains(slot)) {
+            slots.add(slot);
+        }
+
+        blockedSlots.put(key, slots);
+    }
+
+
+	@Override
+	public List<BookingLessonModel> getTutorsLessons(String name) {
+		
+		 List<BookingLessonModel> lessons = new ArrayList<>();
+
+	        for (BookingLessonModel lesson : db.values()) {
+	            if (lesson.getTutors().getName().equals(name)) {
+
+	                lessons.add(lesson);
+	            }
+	        }
+
+	        return lessons;
+	    
+	}
+
 
 
 

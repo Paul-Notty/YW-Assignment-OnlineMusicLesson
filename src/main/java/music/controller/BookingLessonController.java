@@ -174,20 +174,25 @@ public class BookingLessonController {
     
     
     @DeleteMapping("/cancelLesson")
-    public ResponseEntity<String> cancelLesson(@RequestBody BookingLessonModel lesson ) {
-    	
-    	int studentId = lesson.getPup().getStudentid();
-    	
-    	String day = lesson.getDay();
-    	
-        if (!bls.hasLesson(studentId,day)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Yoooo Family, You not got a lesson that day man, are you alright?");
+    public ResponseEntity<String> cancelLesson(@RequestBody BookingLessonModel lesson) {
+
+        int studentId = lesson.getPup().getStudentid();
+        String day = lesson.getDay();
+
+        List<BookingLessonModel> bookings =
+                bls.getBookedLessons(String.valueOf(studentId));
+
+        for (BookingLessonModel booking : bookings) {
+            if (booking.getDay().equals(day)) {
+                bls.cancelLesson(booking);
+
+                return ResponseEntity.status(HttpStatus.ACCEPTED)
+                        .body("Lesson Cancelled");
+            }
         }
 
-        bls.cancelLesson(lesson);
-     
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Lesson Cancelled");
-  
-  }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("No lesson found for this pupil on this day");
+    }
   
 }

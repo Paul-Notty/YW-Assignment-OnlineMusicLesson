@@ -7,7 +7,7 @@ import java.util.Map;
 public class Pupil {
 	
 	private String name; 
-	private Integer studentid ; 
+	private int studentid ; 
 	private Integer age;
 	private List<Instrument> instrument; 
 
@@ -15,7 +15,7 @@ public class Pupil {
 		
 	}
 	
-	public Pupil(String name , Integer age , Integer studentid , List<Instrument> instrument  ) {
+	public Pupil(String name , Integer age , int studentid , List<Instrument> instrument  ) {
 		this.name = name;
 		this.age = age;
 		this.studentid = studentid;
@@ -28,9 +28,6 @@ public class Pupil {
 	public String getName() {
 		return name;
 	}
-
-
-
 
 	public void setName(String name) {
 		this.name = name;

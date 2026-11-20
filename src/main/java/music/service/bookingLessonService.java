@@ -22,9 +22,13 @@ public interface bookingLessonService {
 
     List<BookingLessonModel> getBookedLessons(String id);
     
+    List<BookingLessonModel> getTutorsLessons(String name);
+    
     void cancelLesson(BookingLessonModel lesson );
     
     void addTutor(Tutor tutor);
+    
+    void blockLesson(String tutorName, LocalTime time, String day);
     
     List<Tutor>getAllTutors();
     
