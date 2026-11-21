@@ -213,6 +213,30 @@ function book_lesson() {
     });
 }
 
+function list_availability() {
+
+    const tutor = document.getElementById("tutor").value;
+    const day = document.getElementById("day").value;
+    const slotSelect = document.getElementById("slot");
+
+    fetch('http://localhost:8080/listAvalibility?tutor='
+        + encodeURIComponent(tutor)
+        + '&day=' + encodeURIComponent(day))
+
+        .then(response => response.json())
+
+        .then(times => {
+            slotSelect.innerHTML = "";
+
+            times.forEach(time => {
+                const option = document.createElement("option");
+                option.value = time;
+                option.textContent = time;
+                slotSelect.appendChild(option);
+            });
+        });
+}
+
 
     function cancel_booking() {
       const output = document.getElementById('output');

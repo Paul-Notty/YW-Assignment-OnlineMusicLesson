@@ -40,7 +40,7 @@ public class TutorLessonController {
     	LocalTime time = lesson.getTime(); 
     	String tutor = lesson.getTutors().getName();
     	
-    	bls.blockLesson(day, time , tutor);
+    	bls.blockLesson(tutor, time , day);
     	
     	return ResponseEntity.status(HttpStatus.ACCEPTED).body("Blocking successful");
         

@@ -50,8 +50,8 @@ public class BookingLessonController {
     }
     
     @GetMapping("/listAvalibility")
-    public List <String> listTimeSlots(@RequestParam LocalTime time) {
-    	return bls.bookedTimeSlot(time);
+    public List <String> listTimeSlots(@RequestParam String tutor , String day) {
+    	return bls.availableTimeSlots(tutor , day);
     }
     
     @PostMapping("/book")
@@ -59,9 +59,17 @@ public class BookingLessonController {
     	
     	int studentId = lesson.getPup().getStudentid();
     	String name = lesson.getPup().getName();
+    	String tutName= lesson.getTutors().getName();
+    	LocalTime time;
+    	
     	Pupil pupilId = pts.getPupil(studentId);
+    	if(pupilId == null) {
+    		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Nothing matches our records");	
+    	}
+    	
     	int age = pupilId.getAge();
     	int hour = lesson.getTime().getHour();
+    	int minute = lesson.getTime().getMinute();
     	Tutor tutor = null ; 
     	
     	for(Tutor tutors  : bls.getAllTutors()) {
@@ -76,12 +84,10 @@ public class BookingLessonController {
     		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No tutor here");	
     	}
     	
-    	if(pupilId == null) {
-    		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Nothing matches our records");	
-    	}
+    	
     	
     	if(age<16 && hour>=18) {
-    		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Who let the new born book this late");	
+    		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Student is too young to book this time slot");	
     	}
     	
     	if(!name.equals(pupilId.getName())) {
@@ -138,6 +144,18 @@ public class BookingLessonController {
         if (bls.hasLesson(studentId,lesson.getDay())) {
            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You can only have one lesson per day");
         }
+        
+        if (bls.hasLesson(tutName, lesson.getDay(), hour, minute)){
+        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sorry this tutor already has a lesson at this time");
+        	
+        }
+        
+        if (bls.isBlocked(tutName, lesson.getTime(), lesson.getDay())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("Sorry this tutor has blocked this time slot");
+        }
+        
+        
         
         Pupil bookedPupil = new Pupil() ;
         

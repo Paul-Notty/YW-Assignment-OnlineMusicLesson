@@ -18,7 +18,6 @@ public class bookingLessonServiceImpl implements bookingLessonService {
     private Map<String ,Tutor> tutors;
     private Map<String , List<String>> blockedSlots;
     private int noOfBookings = 1; 
-    private int bookingId = 0;
     
     
    
@@ -37,21 +36,35 @@ public class bookingLessonServiceImpl implements bookingLessonService {
             db.put(noOfBookings, lesson);
             noOfBookings++;
         }
+        
+        
     }
     
-    public List<String> availableTimeSlots(LocalTime time){
-    	
-    	List<String> bookedSlots = bookedTimeSlot(time);
-    	
-    	List<String> timeSlots = new ArrayList<>();
-    	
-    		if (!bookedSlots.contains(time)) {
-    			timeSlots.add(time.toString());
-    		
-    	}
-    	
-		return timeSlots;
-    	
+    public List<String> availableTimeSlots(String tutor, String day) {
+
+        List<String> timeSlots = new ArrayList<>();
+
+        LocalTime start;
+        LocalTime end;
+
+        if (day.equalsIgnoreCase("Sat")) {
+            start = LocalTime.of(9, 0);
+            end = LocalTime.of(20, 0);
+        } else {
+            start = LocalTime.of(16, 0);
+            end = LocalTime.of(20, 0);
+        }
+
+        for (LocalTime time = start;
+             time.isBefore(end);
+             time = time.plusMinutes(30)) {
+
+            if (!hasLesson(tutor, day, time.getHour(), time.getMinute())) {
+                timeSlots.add(time.toString());
+            }
+        }
+
+        return timeSlots;
     }
     
     public List<String> bookedTimeSlot(LocalTime time) {
@@ -104,6 +117,24 @@ public class bookingLessonServiceImpl implements bookingLessonService {
 
         return false;
     }
+    
+    
+    public boolean hasLesson(String tutor, String day, int hour , int minute) {
+
+        for (BookingLessonModel lesson : db.values()) {
+
+            if (lesson.getTutors().getName().equals(tutor)
+            		&& lesson.getDay().equals(day)
+                    && lesson.getTime().getHour() == hour && lesson.getTime().getMinute() == minute) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
+   
 
     
     public void addTutor(Tutor tutor) {
@@ -153,6 +184,19 @@ public class bookingLessonServiceImpl implements bookingLessonService {
 
         blockedSlots.put(key, slots);
     }
+    
+    public boolean isBlocked(String tutorName, LocalTime time, String day) {
+
+        String key = tutorName + "-" + day;
+
+        List<String> slots = blockedSlots.get(key);
+
+        if (slots == null) {
+            return false;
+        }
+
+        return slots.contains("ALL") || slots.contains(time.toString());
+    }
 
 
 	@Override
@@ -170,6 +214,9 @@ public class bookingLessonServiceImpl implements bookingLessonService {
 	        return lessons;
 	    
 	}
+
+
+	
 
 
 

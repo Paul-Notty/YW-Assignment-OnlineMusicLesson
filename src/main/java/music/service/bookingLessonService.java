@@ -16,7 +16,9 @@ public interface bookingLessonService {
 
     boolean hasLesson(int id ,String day);
     
-    List<String> availableTimeSlots(LocalTime time);
+    boolean hasLesson(String tutor ,String day, int hour , int minute);
+    
+    List<String> availableTimeSlots(String tutor , String day);
     
     List<String> bookedTimeSlot(LocalTime time);
 
@@ -25,6 +27,8 @@ public interface bookingLessonService {
     List<BookingLessonModel> getTutorsLessons(String name);
     
     void cancelLesson(BookingLessonModel lesson );
+    
+    boolean isBlocked(String tutorName, LocalTime time, String day);
     
     void addTutor(Tutor tutor);
     

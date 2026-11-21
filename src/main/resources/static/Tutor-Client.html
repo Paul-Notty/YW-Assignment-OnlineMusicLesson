@@ -16,9 +16,6 @@
 	<select id="tutor">
 	<option value="">Select Tutor</option>
 	</select>
-	<h3>
-    Teaches:
-	</h3>
 	<hr/>
 	</H3>
   <div>
@@ -56,6 +53,7 @@
 		updateTimes();
     </script> 
 	<button type="button" onclick="list_upcoming_lessons();">list lessons</button>
+	<button type="button" onclick="block_lesson();">Block a slot</button>
 	</h5>
 	<h2>
 	</hr>
@@ -88,36 +86,6 @@ function read_all_request() {
     });
 }
 
-function create_request() {
-  const output = document.getElementById('output');
-  const lang_val = document.getElementById('lang').value;
-  const msg_val = document.getElementById('msg').value;
-
-  fetch('http://localhost:8080/ding', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      lang: lang_val,
-      msg: msg_val
-    })
-  })
-    .then(response => {
-      output.textContent =
-        'Status: ' + response.status;
-
-      return response.text();
-    })
-    .then(body => {
-      if (body) {
-        output.textContent += '\nResponse: ' + body;
-      }
-    })
-    .catch(error => {
-      output.textContent = error.message;
-    });
-}
 
 function loadTutors() {
 
@@ -152,6 +120,41 @@ function loadTutors() {
         .catch(error => {
             console.error(error);
         });
+}
+
+function block_lesson(){
+
+    const tutor = document.getElementById("tutor").value;
+    const day = document.getElementById("day").value;
+    const time = document.getElementById("slot").value;
+
+    if (!tutor) {
+        alert("Please select a tutor");
+        return;
+    }
+
+    const lesson = {
+        day: day,
+        time: time,
+        tutors: {
+            name: tutor
+        }
+    };
+
+    fetch('http://localhost:8080/block', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(lesson)
+    })
+    .then(response => response.text())
+    .then(message => {
+        document.getElementById("output").textContent = message;
+    })
+    .catch(error => {
+        document.getElementById("output").textContent = error.message;
+    });
 }
 
 
@@ -224,7 +227,7 @@ document.getElementById("tutor").addEventListener("change", function() {
 });
 	
 
-	window.addEventListener("DOMContentLoaded", loadTutors);
+window.addEventListener("DOMContentLoaded", loadTutors);
 
 
   </script>
