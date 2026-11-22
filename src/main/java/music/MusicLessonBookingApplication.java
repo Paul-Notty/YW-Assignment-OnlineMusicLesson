@@ -17,8 +17,6 @@ public class MusicLessonBookingApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(MusicLessonBookingApplication.class, args);
-		
-		
 	}
 	
 	@Bean
@@ -31,7 +29,7 @@ public class MusicLessonBookingApplication {
  
         	
         	Kofi.add(new Instrument("piano" , 3 ,8));
-        	Kofi.add(new Instrument("guitar" , 1 ,8));
+        	Kofi.add(new Instrument("guitar" , 3 ,8));
         	Kofi.add(new Instrument("oboe" , 6 ,9));
         	
        
